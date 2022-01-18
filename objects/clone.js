@@ -1,3 +1,5 @@
+//deep clone an object
+
 //shamelessly stolen from https://github.com/streamich/fastest-json-clone/blob/main/lib/v1.js#L14
 //converted to lambda and replaced var with let/const.
 const isArray = Array.isArray;

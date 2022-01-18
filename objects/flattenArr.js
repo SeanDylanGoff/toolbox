@@ -1,3 +1,5 @@
+//flatten arrays recursively
+
 function flattenArr(items) {
     if (!Array.isArray(items)) {
         return [items];

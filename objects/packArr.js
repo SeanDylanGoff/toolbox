@@ -1,3 +1,5 @@
+//pack an object into an array for space saving or interfacing with tabular data(streams)
+
 import { get } from './get.js';
 
 const packArr = (obj, mapping) => {

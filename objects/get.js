@@ -1,3 +1,5 @@
+//get a property using a simple path syntax
+
 import { normalizePath } from './normalizePath.js';
 import { objToArr } from './objToArr.js';
 

@@ -1,3 +1,5 @@
+//set a property using a simple path syntax
+
 import { normalizePath } from './normalizePath.js';
 
 const set = (obj, path, val) => {

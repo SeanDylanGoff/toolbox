@@ -1,3 +1,5 @@
+//unpack an array into an object, e.g. for interfacing with tabular data(streams)
+
 import { set } from './set.js';
 
 const unpackArr = (arr, mapping) => {
