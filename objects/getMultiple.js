@@ -2,19 +2,11 @@
 
 import { expandPath } from './expandPath.js';
 import { normalizePath } from './normalizePath.js';
-
-//we don't use the usual get here as an optimisation - we know paths are normalized.
-const get = (obj, path) => {
-    while (path.length) {
-        const key = path.shift();
-        obj = obj?.[key];
-    }
-    return obj;
-};
+import { getNormalized } from './get.js';
 
 const getMultiple = (obj, path) => {
     const paths = expandPath(normalizePath(path));
-    return paths.map(path => get(obj, path));
+    return paths.map(path => getNormalized(obj, path));
 };
 
 export { getMultiple };
