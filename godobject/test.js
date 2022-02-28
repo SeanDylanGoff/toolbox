@@ -2,6 +2,7 @@ import { deepStrictEqual } from 'assert';
 
 import { store } from './store.js';
 import createContext from './context.js';
+import { parsePattern } from '../objects/parsePattern.js';
 
 const ctx = createContext(store);
 
@@ -20,17 +21,10 @@ deepStrictEqual(ctx.context('a.y').values.value, [
 
 const pattern = 'a.b.:key1(x|y|z).c.:key2';
 
-const parsePattern = pattern =>
-    pattern.split('.').map(segment => {
-        if (segment.startsWith(':')) {
-            const match = segment.match(/:(.+?)(?:\((.+)\))?$/);
-            return {
-                key: match[1],
-                wildcard: !match[2],
-                segments: match[2]?.split('|'),
-            };
-        }
-        return { segments: [segment] };
-    });
+//console.log(parsePattern(pattern));
 
-console.log(parsePattern(pattern));
+ctx.watch('a.b.c', e => {
+    console.log('a.b.c watcher triggered', e);
+});
+
+ctx.context('a.b.c').value.value = 456;
