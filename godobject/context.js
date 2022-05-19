@@ -2,14 +2,18 @@ import { computed } from 'vue';
 import { normalizePath } from '../objects/normalizePath.js';
 import { getMultiple } from '../objects/getMultiple.js';
 import { setMultiple } from '../objects/setMultiple.js';
+import { parsePattern } from '../objects/parsePattern.js';
+import { testPattern } from '../objects/testPattern.js';
 
 const watchers = [];
 
 function setupContext(store) {
     function triggerWatchers(path) {
-        watchers.forEach(watcher=>{
-            if(comparePaths(watcher.path, path))
-        })
+        watchers.forEach(watcher => {
+            if (testPattern(path, watcher.pattern)) {
+                watcher.handler(path);
+            }
+        });
     }
 
     function setAndTrigger(path, val) {
@@ -37,9 +41,9 @@ function setupContext(store) {
                 return createContext([basePath, propertyPath]);
             },
             path: basePath,
-            watch: (path, handler) => {
+            watch: (pattern, handler) => {
                 const watcher = {
-                    path: normalizePath([basePath, path]),
+                    pattern: parsePattern([basePath, pattern]),
                     handler,
                 };
                 watchers.push(watcher);

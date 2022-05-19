@@ -1,5 +1,7 @@
+import { normalizePath } from './normalizePath.js';
+
 export const parsePattern = pattern =>
-    pattern.split('.').map(segment => {
+    normalizePath(pattern).map(segment => {
         if (segment.startsWith(':')) {
             const match = segment.match(/:(.+?)(?:\((.+)\))?$/);
             return {

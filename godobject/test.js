@@ -3,6 +3,8 @@ import { deepStrictEqual } from 'assert';
 import { store } from './store.js';
 import createContext from './context.js';
 import { parsePattern } from '../objects/parsePattern.js';
+import { matchPattern } from '../objects/matchPattern.js';
+import { getChangedPaths } from '../objects/getChangedPaths.js';
 
 const ctx = createContext(store);
 
@@ -25,6 +27,9 @@ const pattern = 'a.b.:key1(x|y|z).c.:key2';
 
 ctx.watch('a.b.c', e => {
     console.log('a.b.c watcher triggered', e);
+    console.log(
+        getChangedPaths(e, 'a.:x.c').map(p => matchPattern(p, 'a.:x.c'))
+    );
 });
 
-ctx.context('a.b.c').value.value = 456;
+ctx.context('a.b').value.value = 456;

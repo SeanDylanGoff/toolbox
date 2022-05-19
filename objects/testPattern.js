@@ -6,7 +6,7 @@ import { hasCommonElement } from './hasCommonElement.js';
 import { expandPathSegment } from './expandPathSegment.js';
 
 const testPattern = (path, pattern) => {
-    pattern = parsePattern(pattern);
+    //pattern = parsePattern(pattern);
     path = normalizePath(path).map(expandPathSegment);
 
     const min = Math.min(path.length, pattern.length);
