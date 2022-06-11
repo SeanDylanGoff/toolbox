@@ -6,7 +6,11 @@ import { getNormalized } from './get.js';
 
 const getMultiple = (obj, path) => {
     const paths = expandPath(normalizePath(path));
-    return paths.map(path => getNormalized(obj, path));
+
+    return paths.map(path => ({
+        path,
+        value: getNormalized(obj, path),
+    }));
 };
 
 export { getMultiple };

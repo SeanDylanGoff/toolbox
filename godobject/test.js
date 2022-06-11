@@ -5,6 +5,8 @@ import createContext from './context.js';
 import { parsePattern } from '../objects/parsePattern.js';
 import { matchPattern } from '../objects/matchPattern.js';
 import { getChangedPaths } from '../objects/getChangedPaths.js';
+import createTransport from './transports/loopback.js';
+import sync from './sync.js';
 
 const ctx = createContext(store);
 
@@ -33,3 +35,10 @@ ctx.watch('a.b.c', e => {
 });
 
 ctx.context('a.b').value.value = 456;
+
+console.log('test sync');
+
+const transport = createTransport();
+
+transport.a.addEventListener(data => console.log('a', data));
+transport.b.addEventListener(data => console.log('b', data));

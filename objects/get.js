@@ -3,6 +3,7 @@
 import { normalizePath } from './normalizePath.js';
 
 const getNormalized = (obj, normalizedPath) => {
+    normalizedPath = [...normalizedPath];
     while (normalizedPath.length) {
         const key = normalizedPath.shift();
         obj = obj?.[key];

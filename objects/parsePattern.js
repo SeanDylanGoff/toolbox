@@ -2,7 +2,7 @@ import { normalizePath } from './normalizePath.js';
 
 export const parsePattern = pattern =>
     normalizePath(pattern).map(segment => {
-        if (segment.startsWith(':')) {
+        if (typeof segment === 'string' && segment.startsWith(':')) {
             const match = segment.match(/:(.+?)(?:\((.+)\))?$/);
             return {
                 key: match[1],

@@ -8,7 +8,6 @@ import { expandPathSegment } from './expandPathSegment.js';
 const testPattern = (path, pattern) => {
     //pattern = parsePattern(pattern);
     path = normalizePath(path).map(expandPathSegment);
-
     const min = Math.min(path.length, pattern.length);
 
     for (let i = 0; i < min; i++) {

@@ -1,5 +1,5 @@
 import { computed } from 'vue';
-import { watch, setByPath, getByPath } from './store';
+import { watch, setByPath, getByPath } from './store.js';
 
 function sync(peer, pattern, peerName) {
     //console.log('init sync peer');
@@ -44,12 +44,19 @@ function sync(peer, pattern, peerName) {
                     keys = Object.keys(updatedSubTree || {});
                 }
                 keys.forEach(key => {
-                    walk(updatedSubTree?.[key], pattern.slice(1), [...updatedPath, key]);
+                    walk(updatedSubTree?.[key], pattern.slice(1), [
+                        ...updatedPath,
+                        key,
+                    ]);
                 });
             }
         }
 
-        walk(updatedSubTree, parsedPattern.slice(updatedPath.length), updatedPath);
+        walk(
+            updatedSubTree,
+            parsedPattern.slice(updatedPath.length),
+            updatedPath
+        );
     }
 
     function receive(data, source) {
@@ -73,12 +80,18 @@ function sync(peer, pattern, peerName) {
 
     if (peer.postMessage) {
         transmit = function (data) {
-            peer.postMessage({ type: 'distributedStoreSync', data: JSON.stringify(data) }, '*');
+            peer.postMessage(
+                { type: 'distributedStoreSync', data: JSON.stringify(data) },
+                '*'
+            );
         };
 
         window.addEventListener('message', event => {
             //console.log(event);
-            if (event?.data?.type === 'distributedStoreSync' && event.source === peer) {
+            if (
+                event?.data?.type === 'distributedStoreSync' &&
+                event.source === peer
+            ) {
                 receive(JSON.parse(event.data.data), event.source);
             }
         });
