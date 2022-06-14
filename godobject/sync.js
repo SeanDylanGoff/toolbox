@@ -9,7 +9,7 @@ function sync(store, peer, pattern, log) {
         storeId: store.__id,
     });
 
-    const { watch, set, getAll } = createContext(store);
+    const { watch, set, get } = createContext(store);
     log('init sync peer');
     const parsedPattern = parsePattern(pattern);
 
@@ -20,7 +20,7 @@ function sync(store, peer, pattern, log) {
     let syncingQueued = false;
 
     function transmitDeltas() {
-        log(`${store.__id} --> ${remoteStoreId}`);
+        log(`${store.__id} --> ${remoteStoreId}`, JSON.stringify(updates));
         syncingQueued = false;
         peer.transmit({ pattern, updates });
         /*console.log(
@@ -30,13 +30,13 @@ function sync(store, peer, pattern, log) {
         updates = [];
     }
 
-    function computeDeltas(updatedPath, source) {
+    function computeDeltas(updatedPaths, source) {
         if (!syncingQueued) {
             setTimeout(transmitDeltas, 0);
             syncingQueued = true;
         }
         //log('updatedPath', updatedPath);
-        const updatedSubTree = getAll(updatedPath);
+        const updatedSubTree = updatedPaths.map(path => [path, get(path)]);
         //log('updatedSubTree', updatedSubTree);
 
         updates.push({
@@ -65,8 +65,8 @@ function sync(store, peer, pattern, log) {
         );*/
         //log(deltas);
         updates.forEach(({ source, deltas }) => {
-            deltas.forEach(({ path, value }) => {
-                //log(`set in ${store.__id}`);
+            deltas.forEach(([path, value]) => {
+                log(`set in ${store.__id}`);
                 set(path, value, source);
             });
         });
@@ -74,7 +74,7 @@ function sync(store, peer, pattern, log) {
 
     peer.addEventListener(d => receive(d, peer));
 
-    watch(pattern, (path, value, source) => {
+    watch(pattern, ({ changedPaths, source }) => {
         //log(`watch event from ${store.__id}`);
         if (!isMaster) {
             return;
@@ -84,7 +84,7 @@ function sync(store, peer, pattern, log) {
         }
         source ||= [];
         source.push(store.__id);
-        computeDeltas(path, source);
+        computeDeltas(changedPaths, source);
     });
 
     const configurator = {

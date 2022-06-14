@@ -5,6 +5,8 @@ import { getMultiple } from '../objects/getMultiple.js';
 import { setMultiple } from '../objects/setMultiple.js';
 import { parsePattern } from '../objects/parsePattern.js';
 import { testPattern } from '../objects/testPattern.js';
+import { getChangedPaths } from '../objects/getChangedPaths.js';
+import { get } from '../objects/get.js';
 
 function setupContext(store) {
     store.__watchers ||= [];
@@ -15,7 +17,14 @@ function setupContext(store) {
         function triggerWatchers(path, source) {
             watchers.forEach(watcher => {
                 if (testPattern(path, watcher.pattern)) {
-                    watcher.handler(path, null, source);
+                    watcher.handler({
+                        source,
+                        originalPath: path,
+                        pattern: watcher.pattern,
+                        get changedPaths() {
+                            return getChangedPaths(path, watcher.pattern);
+                        },
+                    });
                 }
             });
         }
@@ -45,6 +54,8 @@ function setupContext(store) {
                         value,
                         source
                     ),
+                get: propertyPath =>
+                    get(store.data, normalizePath([basePath, propertyPath])),
                 getAll: propertyPath =>
                     getMultiple(store.data, [basePath, propertyPath]),
                 context(propertyPath) {

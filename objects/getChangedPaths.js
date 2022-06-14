@@ -1,13 +1,11 @@
-//get the intersection of two paths (in its fully expanded and normalized form)
+//get the intersection of a path and a pattern (in its fully expanded and normalized form)
 
 import { normalizePath } from './normalizePath.js';
 import { parsePattern } from './parsePattern.js';
 import { expandPath } from './expandPath.js';
 
 const getChangedPaths = (path, pattern) => {
-    pattern = parsePattern(pattern);
     const paths = expandPath(normalizePath(path));
-    //console.log('getintersection', paths, pattern);
 
     const changedPaths = [];
 
@@ -25,6 +23,7 @@ const getChangedPaths = (path, pattern) => {
             } else {
                 return;
             }
+
             curChangedPaths = segments.flatMap(key => {
                 return curChangedPaths.map(path => {
                     return [...path, key];

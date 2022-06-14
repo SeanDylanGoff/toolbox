@@ -32,21 +32,23 @@ const delay = ms => new Promise(resolve => setTimeout(resolve, ms));
 
 async function main() {
     bidiSync(storeA, transport0.a, ':_', coloredLogger('red'));
-    bidiSync(storeA, transport1.a, ':_', coloredLogger('red'));
     bidiSync(storeB, transport0.b, ':_', coloredLogger('green'));
-    bidiSync(storeC, transport1.b, ':_', coloredLogger('blue'));
+    bidiSync(storeA, transport1.a, ':_(a|b)', coloredLogger('red'));
+    bidiSync(storeC, transport1.b, ':_(a|b)', coloredLogger('blue'));
 
-    bidiSync(storeB, transport2.a, ':_', coloredLogger('yellow'));
-    bidiSync(storeC, transport2.b, ':_', coloredLogger('yellow'));
+    //bidiSync(storeB, transport2.a, ':_', coloredLogger('yellow'));
+    //bidiSync(storeC, transport2.b, ':_', coloredLogger('yellow'));
 
     await delay(100);
 
-    ctxA.set('test', 1234);
-    ctxA.set('test1', 1234);
+    //ctxA.set('test', 1234);
+    //ctxA.set('test1', 1234);
+
+    ctxA.context([{ a: true, b: true, c: true }]).value.value = 4;
 
     setTimeout(() => {
         console.log(storeA.data, storeB.data, storeC.data);
-    }, 2000);
+    }, 600);
 }
 main();
 
