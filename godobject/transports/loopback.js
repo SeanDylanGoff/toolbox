@@ -5,8 +5,8 @@ const createTransport = () => {
 
     const createSide = (self, other) => ({
         transmit: data => {
-            //console.log(`transmit ${self} --> ${other}`, data);
-            data = clone(data);
+            data = JSON.stringify(data);
+
             setTimeout(() => {
                 clients[other].listeners.forEach(l => l(data));
             }, 100);

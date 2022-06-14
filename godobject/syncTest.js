@@ -31,7 +31,7 @@ const ctxC = createContext(storeC);
 const delay = ms => new Promise(resolve => setTimeout(resolve, ms));
 
 async function main() {
-    bidiSync(storeA, transport0.a, ':_', coloredLogger('red'));
+    const syncer0 = bidiSync(storeA, transport0.a, ':_', coloredLogger('red'));
     bidiSync(storeB, transport0.b, ':_', coloredLogger('green'));
     bidiSync(storeA, transport1.a, ':_(a|b)', coloredLogger('red'));
     bidiSync(storeC, transport1.b, ':_(a|b)', coloredLogger('blue'));
@@ -48,6 +48,7 @@ async function main() {
 
     setTimeout(() => {
         console.log(storeA.data, storeB.data, storeC.data);
+        console.log(syncer0.statistics);
     }, 600);
 }
 main();

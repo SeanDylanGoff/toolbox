@@ -2,6 +2,25 @@ import { parsePattern } from '../objects/parsePattern.js';
 import createContext from './context.js';
 
 function sync(store, peer, pattern, log) {
+    const statistics = {
+        sent: {
+            batches: 0,
+            updates: 0,
+            deltas: 0,
+            get bytes() {
+                return peer.statistics.sent.bytes;
+            },
+        },
+        received: {
+            batches: 0,
+            updates: 0,
+            deltas: 0,
+            get bytes() {
+                return peer.statistics.received.bytes;
+            },
+        },
+    };
+
     log ||= () => {};
     let remoteStoreId;
 
@@ -27,6 +46,9 @@ function sync(store, peer, pattern, log) {
             `SYNC EVENT: TRANSMIT (${peerName}) ${pattern}\n` +
             delta.map(delta => `${delta[0].join('.')} ${JSON.stringify(delta[1])}`).join('\n')
         );*/
+        statistics.sent.batches++;
+        statistics.sent.updates += updates.length;
+
         updates = [];
     }
 
@@ -36,12 +58,13 @@ function sync(store, peer, pattern, log) {
             syncingQueued = true;
         }
         //log('updatedPath', updatedPath);
-        const updatedSubTree = updatedPaths.map(path => [path, get(path)]);
+        const deltas = updatedPaths.map(path => [path, get(path)]);
         //log('updatedSubTree', updatedSubTree);
+        statistics.sent.deltas += deltas.length;
 
         updates.push({
             source,
-            deltas: updatedSubTree,
+            deltas,
         });
     }
 
@@ -64,7 +87,10 @@ function sync(store, peer, pattern, log) {
             delta.map(delta => `${delta[0].join('.')} ${JSON.stringify(delta[1])}`).join('\n')
         );*/
         //log(deltas);
+        statistics.received.batches++;
+        statistics.received.updates += updates.length;
         updates.forEach(({ source, deltas }) => {
+            statistics.received.deltas += deltas.length;
             deltas.forEach(([path, value]) => {
                 log(`set in ${store.__id}`);
                 set(path, value, source);
@@ -88,6 +114,7 @@ function sync(store, peer, pattern, log) {
     });
 
     const configurator = {
+        statistics,
         startMaster() {
             isMaster = true;
             return configurator;
