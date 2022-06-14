@@ -6,9 +6,11 @@ import { setMultiple } from '../objects/setMultiple.js';
 import { parsePattern } from '../objects/parsePattern.js';
 import { testPattern } from '../objects/testPattern.js';
 
-const watchers = [];
-
 function setupContext(store) {
+    store.__watchers ||= [];
+    store.__watchers.toString = () => 'aaaa';
+
+    const watchers = store.__watchers;
     if (!store.__ctx) {
         function triggerWatchers(path, source) {
             watchers.forEach(watcher => {
@@ -19,15 +21,15 @@ function setupContext(store) {
         }
 
         function setAndTrigger(path, val, source) {
-            console.log('setAndTrigger', path, val, source?.id);
-            setMultiple(store, path, val);
+            //console.log('setAndTrigger', path, val, source?.id, store.__id);
+            setMultiple(store.data, path, val);
             triggerWatchers(path, source);
         }
 
         function createContext(basePath = []) {
             basePath = normalizePath(basePath);
 
-            const values = computed(() => getMultiple(store, basePath));
+            const values = computed(() => getMultiple(store.data, basePath));
             const context = {
                 isMultiple: computed(() => values.value.length > 1),
                 isUndefined: computed(() => value.value === undefined),
@@ -44,7 +46,7 @@ function setupContext(store) {
                         source
                     ),
                 getAll: propertyPath =>
-                    getMultiple(store, [basePath, propertyPath]),
+                    getMultiple(store.data, [basePath, propertyPath]),
                 context(propertyPath) {
                     return createContext([basePath, propertyPath]);
                 },

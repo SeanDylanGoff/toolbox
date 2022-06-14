@@ -5,8 +5,11 @@ const createTransport = () => {
 
     const createSide = (self, other) => ({
         transmit: data => {
+            //console.log(`transmit ${self} --> ${other}`, data);
             data = clone(data);
-            clients[other].listeners.forEach(l => l(data));
+            setTimeout(() => {
+                clients[other].listeners.forEach(l => l(data));
+            }, 100);
         },
         addEventListener: listener => clients[self].listeners.push(listener),
         listeners: [],

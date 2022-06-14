@@ -1,46 +1,60 @@
 import { parsePattern } from '../objects/parsePattern.js';
 import createContext from './context.js';
 
-function sync(store, peer, pattern, peerName) {
+function sync(store, peer, pattern, log) {
+    log ||= () => {};
+    let remoteStoreId;
+
+    peer.transmit({
+        storeId: store.__id,
+    });
+
     const { watch, set, getAll } = createContext(store);
-    //console.log('init sync peer');
+    log('init sync peer');
     const parsedPattern = parsePattern(pattern);
 
     let isMaster = false;
     let isSlave = false;
 
-    let delta = [];
+    let updates = [];
     let syncingQueued = false;
 
     function transmitDeltas() {
-        //console.log('deltas');
+        log(`${store.__id} --> ${remoteStoreId}`);
         syncingQueued = false;
-        peer.transmit({ pattern, delta });
+        peer.transmit({ pattern, updates });
         /*console.log(
             `SYNC EVENT: TRANSMIT (${peerName}) ${pattern}\n` +
             delta.map(delta => `${delta[0].join('.')} ${JSON.stringify(delta[1])}`).join('\n')
         );*/
-        delta = [];
+        updates = [];
     }
 
-    function computeDeltas(updatedPath) {
+    function computeDeltas(updatedPath, source) {
         if (!syncingQueued) {
             setTimeout(transmitDeltas, 0);
             syncingQueued = true;
         }
-        console.log('updatedPath', updatedPath);
+        //log('updatedPath', updatedPath);
         const updatedSubTree = getAll(updatedPath);
-        console.log('updatedSubTree', updatedSubTree);
+        //log('updatedSubTree', updatedSubTree);
 
-        delta.push(...updatedSubTree);
+        updates.push({
+            source,
+            deltas: updatedSubTree,
+        });
     }
 
-    function receive(data, source) {
-        //console.log({ data });
+    function receive(data) {
+        if (data.storeId) {
+            remoteStoreId = data.storeId;
+            return;
+        }
+        //log('rx deltas');
         if (!isSlave) {
             return;
         }
-        const { delta, pattern: _pattern } = data;
+        const { pattern: _pattern, updates } = data;
         if (pattern !== _pattern) {
             //console.log(`${_pattern} !== ${pattern}`)
             return;
@@ -49,19 +63,28 @@ function sync(store, peer, pattern, peerName) {
             `SYNC EVENT: RECEIVE (${peerName}) ${pattern} ${delta[0][0].join('.')}\n` +
             delta.map(delta => `${delta[0].join('.')} ${JSON.stringify(delta[1])}`).join('\n')
         );*/
-        console.log(delta);
-        delta.forEach(({ path, value }) => {
-            set(path, value, source);
+        //log(deltas);
+        updates.forEach(({ source, deltas }) => {
+            deltas.forEach(({ path, value }) => {
+                //log(`set in ${store.__id}`);
+                set(path, value, source);
+            });
         });
     }
 
     peer.addEventListener(d => receive(d, peer));
 
     watch(pattern, (path, value, source) => {
-        if (!isMaster || source === peer) {
+        //log(`watch event from ${store.__id}`);
+        if (!isMaster) {
             return;
         }
-        computeDeltas(path);
+        if (source?.includes(remoteStoreId)) {
+            return;
+        }
+        source ||= [];
+        source.push(store.__id);
+        computeDeltas(path, source);
     });
 
     const configurator = {
