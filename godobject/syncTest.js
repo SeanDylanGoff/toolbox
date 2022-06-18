@@ -46,10 +46,9 @@ async function main() {
 
     ctxA.context([{ a: true, b: true, c: true }]).value.value = 4;
 
-    setTimeout(() => {
-        console.log(storeA.data, storeB.data, storeC.data);
-        console.log(syncer0.statistics);
-    }, 600);
+    await delay(500);
+    console.log(storeA.data, storeB.data, storeC.data);
+    console.log(syncer0.statistics);
 }
 main();
 
