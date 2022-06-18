@@ -1,8 +1,6 @@
-import { clone } from '../../objects/clone.js';
+const clients = {};
 
 const createTransport = () => {
-    const clients = {};
-
     const createSide = (self, other) => {
         const peer = {
             statistics: {

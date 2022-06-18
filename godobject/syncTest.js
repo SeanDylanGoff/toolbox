@@ -1,8 +1,4 @@
-import { deepStrictEqual } from 'assert';
 import createContext from './context.js';
-import { parsePattern } from '../objects/parsePattern.js';
-import { matchPattern } from '../objects/matchPattern.js';
-import { getChangedPaths } from '../objects/getChangedPaths.js';
 import createTransport from './transports/loopback.js';
 import sync from './sync.js';
 import chalk from 'chalk';
@@ -41,11 +37,10 @@ async function main() {
 
     await delay(100);
 
-    //ctxA.set('test', 1234);
-    //ctxA.set('test1', 1234);
+    ctxA.set('test', 1234);
+    ctxA.set('test1', 1234);
 
     ctxA.context([{ a: true, b: true, c: true }]).value.value = 4;
-
     await delay(500);
     console.log(storeA.data, storeB.data, storeC.data);
     console.log(syncer0.statistics);
