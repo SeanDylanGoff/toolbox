@@ -1,12 +1,14 @@
-import { computed } from '/Users/sean/development/toolbox/godobject/node_modules/vue/dist/vue.esm-browser.js';
-
-import { normalizePath } from '../objects/normalizePath.js';
-import { getMultiple } from '../objects/getMultiple.js';
-import { setMultiple } from '../objects/setMultiple.js';
-import { parsePattern } from '../objects/parsePattern.js';
-import { testPattern } from '../objects/testPattern.js';
-import { getChangedPaths } from '../objects/getChangedPaths.js';
-import { get } from '../objects/get.js';
+import { computed } from 'vue';
+import {
+    normalizePath,
+    getMultiple,
+    setMultiple,
+    parsePattern,
+    testPattern,
+    getChangedPaths,
+    get,
+    clone,
+} from '../objects/index.js';
 
 function setupContext(store) {
     store.__watchers ||= [];
@@ -31,6 +33,7 @@ function setupContext(store) {
 
         function setAndTrigger(path, val, source) {
             //console.log('setAndTrigger', path, val, source?.id, store.__id);
+            val = clone(val); //storing references *would* create weird side-effects
             setMultiple(store.data, path, val);
             triggerWatchers(path, source);
         }

@@ -1,4 +1,4 @@
-import { parsePattern } from '../objects/parsePattern.js';
+import { parsePattern } from '../objects/index.js';
 import createContext from './context.js';
 
 function sync(store, peer, pattern, log) {
