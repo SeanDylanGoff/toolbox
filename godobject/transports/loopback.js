@@ -1,26 +1,27 @@
-const clients = {};
-
 const createTransport = () => {
+    const clients = {};
+
     const createSide = (self, other) => {
         const peer = {
-            statistics: {
-                sent: {
-                    bytes: 0,
-                },
-            },
-            transmit: data => {
-                data = JSON.stringify(data);
+            transmit: (channel, data) => {
+                let payload = JSON.stringify({ channel, data });
 
-                peer.statistics.sent.bytes += data.length;
-                data = JSON.parse(data);
+                const length = payload.length;
+                payload = JSON.parse(payload);
 
                 setTimeout(() => {
-                    clients[other].listeners.forEach(l => l(data));
+                    clients[other].listeners[channel].forEach(l =>
+                        l(data, length)
+                    );
                 }, 100);
+
+                return length;
             },
-            addEventListener: listener =>
-                clients[self].listeners.push(listener),
-            listeners: [],
+            addEventListener: (channel, listener) => {
+                clients[self].listeners[channel] ||= [];
+                clients[self].listeners[channel].push(listener);
+            },
+            listeners: {},
             id: self,
         };
         return peer;

@@ -39,6 +39,7 @@ async function main() {
 
     ctxA.set('test', 1234);
     ctxA.set('test1', 1234);
+    ctxB.set('test3', 1234);
 
     ctxA.context([{ a: true, b: true, c: true }]).value.value = 4;
     await delay(500);

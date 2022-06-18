@@ -7,24 +7,20 @@ function sync(store, peer, pattern, log) {
             batches: 0,
             updates: 0,
             deltas: 0,
-            get bytes() {
-                return peer.statistics.sent.bytes;
-            },
+            bytes: 0,
         },
         received: {
             batches: 0,
             updates: 0,
             deltas: 0,
-            get bytes() {
-                return peer.statistics.received.bytes;
-            },
+            bytes: 0,
         },
     };
 
     log ||= () => {};
     let remoteStoreId;
 
-    peer.transmit({
+    peer.transmit(pattern, {
         storeId: store.__id,
     });
 
@@ -41,13 +37,13 @@ function sync(store, peer, pattern, log) {
     function transmitDeltas() {
         log(`${store.__id} --> ${remoteStoreId}`, JSON.stringify(updates));
         syncingQueued = false;
-        peer.transmit({ pattern, updates });
         /*console.log(
             `SYNC EVENT: TRANSMIT (${peerName}) ${pattern}\n` +
             delta.map(delta => `${delta[0].join('.')} ${JSON.stringify(delta[1])}`).join('\n')
         );*/
         statistics.sent.batches++;
         statistics.sent.updates += updates.length;
+        statistics.sent.bytes += peer.transmit(pattern, updates);
 
         updates = [];
     }
@@ -68,7 +64,7 @@ function sync(store, peer, pattern, log) {
         });
     }
 
-    function receive(data) {
+    function receive(data, length) {
         if (data.storeId) {
             remoteStoreId = data.storeId;
             return;
@@ -77,11 +73,8 @@ function sync(store, peer, pattern, log) {
         if (!isSlave) {
             return;
         }
-        const { pattern: _pattern, updates } = data;
-        if (pattern !== _pattern) {
-            //console.log(`${_pattern} !== ${pattern}`)
-            return;
-        }
+        const updates = data;
+
         /*console.log(
             `SYNC EVENT: RECEIVE (${peerName}) ${pattern} ${delta[0][0].join('.')}\n` +
             delta.map(delta => `${delta[0].join('.')} ${JSON.stringify(delta[1])}`).join('\n')
@@ -89,6 +82,7 @@ function sync(store, peer, pattern, log) {
         //log(deltas);
         statistics.received.batches++;
         statistics.received.updates += updates.length;
+        statistics.received.bytes += length;
         updates.forEach(({ source, deltas }) => {
             statistics.received.deltas += deltas.length;
             deltas.forEach(([path, value]) => {
@@ -98,7 +92,7 @@ function sync(store, peer, pattern, log) {
         });
     }
 
-    peer.addEventListener(d => receive(d, peer));
+    peer.addEventListener(pattern, receive);
 
     watch(pattern, ({ changedPaths, source }) => {
         //log(`watch event from ${store.__id}`);
